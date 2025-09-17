@@ -1,0 +1,12 @@
+app: boltic-feedback-form
+region: asia-south1
+language: nodejs/20
+
+build:
+  buildpack_builder: paketobuildpacks/builder-jammy-base
+  buildpacks:
+    - paketo-buildpacks/nodejs
+  ignorefile: .gitignore
+
+env:
+  PORT: "8080"

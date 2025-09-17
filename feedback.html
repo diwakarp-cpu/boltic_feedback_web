@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boltic • Training Feedback</title>
+  <link rel="icon" type="image/x-icon" href="https://asia-south1.console.boltic.io/assets/favicon-CTe68CHs.ico">
+  <style>
+    :root {
+      --boltic-orange: #ff6b35;
+      --boltic-orange-grad: linear-gradient(135deg, #ff6b35 0%, #f093fb 100%);
+      --bg-deep: #1a202c;
+      --text-deep: #2d3748;
+      --muted: #718096;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--bg-deep);
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--text-deep);
+    }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 40px 0; }
+
+    .header { text-align: center; margin-bottom: 32px; }
+    .logo { margin-bottom: 20px; }
+    .logo img { height: 60px; max-width: 200px; object-fit: contain; }
+    .header h1 { font-size: 2.2rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .header p { color: #cbd5e0; }
+
+    .card {
+      background: #fff; border-radius: 16px; padding: 28px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.1); border: 1px solid rgba(255,255,255,.2);
+    }
+
+    .label {
+      font-size: 0.85rem; color: var(--muted);
+      font-weight: 700; margin-bottom: 6px; letter-spacing: .04em;
+    }
+    .label.req::after { content: " *"; color: #e53e3e; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .row { margin-bottom: 18px; }
+    .row.full { grid-column: 1 / -1; }
+
+    input[type="text"], input[type="email"], textarea, select {
+      width: 100%; padding: 12px 14px; border-radius: 10px;
+      border: 1px solid #e2e8f0; background: #f7fafc;
+      font-size: 1rem; color: var(--text-deep);
+      transition: border-color .15s ease, box-shadow .15s ease; outline: none;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+
+    /* Boltic orange when selected/focused */
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--boltic-orange);
+      box-shadow: 0 0 0 3px rgba(255,107,53,0.25);
+      background: #fff;
+    }
+
+    .btn {
+      border: 0; border-radius: 10px; padding: 12px 16px; font-weight: 700; cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease; background: #edf2f7; color: #1a202c;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
+    /* Solid Boltic orange submit */
+    .btn-primary { background: var(--boltic-orange); color: #fff; }
+    .btn-primary:hover { box-shadow: 0 6px 16px rgba(255,107,53,.35); }
+
+    .toolbar { display: flex; gap: 10px; justify-content: flex-end; align-items: center; margin-top: 8px; }
+
+    fieldset { border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; }
+    legend { padding: 0 8px; font-weight: 700; color: #4a5568; }
+
+    .radio-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+
+    .radio-pill {
+      display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px;
+      border: 1px solid #e2e8f0; background: #f7fafc; cursor: pointer; user-select: none;
+      transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .radio-pill input { accent-color: var(--boltic-orange); }
+    label.radio-pill:has(input:checked) {
+      background: var(--boltic-orange); color: #fff; border-color: var(--boltic-orange);
+      box-shadow: 0 0 0 3px rgba(255,107,53,0.25);
+    }
+
+    /* Slider + ticks */
+    .range-wrap { display: block; margin-top: 10px; }
+    input[type="range"] { width: 100%; accent-color: var(--boltic-orange); }
+
+    .ticks {
+      display: grid; grid-template-columns: repeat(10, 1fr);
+      gap: 0; margin-top: 8px; user-select: none;
+    }
+    .tick {
+      font-size: .9rem; color: #718096; text-align: center; padding: 6px 0; border-radius: 8px;
+      cursor: pointer; transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+    }
+    .tick.active {
+      color: #fff; background: var(--boltic-orange);
+      box-shadow: 0 0 0 3px rgba(255,107,53,0.20);
+      font-weight: 800;
+    }
+
+    .success, .error { color: #fff; padding: 14px 16px; border-radius: 10px; margin-bottom: 16px; display: none; }
+    .success { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+    .error { background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%); }
+
+    .decorative-element {
+      position: absolute; width: 100px; height: 100px;
+      background: var(--boltic-orange-grad); border-radius: 50%; opacity: .1; z-index: -1; animation: float 6s ease-in-out infinite;
+    }
+    .decorative-element:nth-child(1) { top: 10%; right: 10%; }
+    .decorative-element:nth-child(2) { bottom: 10%; left: 10%; animation-direction: reverse; }
+    @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-20px) } }
+
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+
+<body>
+  <div class="decorative-element"></div>
+  <div class="decorative-element"></div>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <img src="https://docs.boltic.io/img/boltic.svg" alt="Boltic Logo" />
+      </div>
+      <h1>Training Feedback</h1>
+      <p>Share your thoughts about the Boltic session for Fynd.</p>
+    </div>
+
+    <div class="card">
+      <div id="alertOk" class="success"></div>
+      <div id="alertError" class="error"></div>
+
+      <form id="feedbackForm" novalidate>
+        <div class="grid">
+          <div class="row">
+            <div class="label req">First Name</div>
+            <input id="firstName" name="first_name" type="text" placeholder="e.g., John" required />
+          </div>
+          <div class="row">
+            <div class="label req">Last Name</div>
+            <input id="lastName" name="last_name" type="text" placeholder="e.g., Doe" required />
+          </div>
+
+          <div class="row full">
+            <div class="label req">Email ID</div>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@gofynd.com"
+              required
+              pattern="^[a-zA-Z0-9._%+-]+@gofynd\.com$"
+              title="Please use your @gofynd.com email address." />
+          </div>
+
+          <!-- Usefulness: Slider 1–10 with ticks -->
+          <div class="row full">
+            <fieldset>
+              <legend class="label req">How useful was this training session for your role at Fynd?</legend>
+              <div class="range-wrap">
+                <input
+                  id="usefulness"
+                  name="usefulness"
+                  type="range"
+                  min="1" max="10" step="1" value="5" required
+                  aria-label="Usefulness (1 to 10)" />
+                <div id="usefulnessTicks" class="ticks" aria-hidden="true"></div>
+              </div>
+            </fieldset>
+          </div>
+
+          <!-- Delivery radios with "Good" -->
+          <div class="row full">
+            <fieldset>
+              <legend class="label req">How clear and engaging was the trainer’s delivery?</legend>
+              <div class="radio-group" role="radiogroup" aria-label="Trainer delivery rating">
+                <label class="radio-pill">
+                  <input type="radio" name="delivery" value="Bad" required />
+                  Bad
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="delivery" value="Average" />
+                  Average
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="delivery" value="Good" />
+                  Good
+                </label>
+                <label class="radio-pill">
+                  <input type="radio" name="delivery" value="Excellent" />
+                  Excellent
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="row full">
+            <div class="label">What is one key takeaway or feature of Boltic you found most valuable?</div>
+            <textarea id="takeaway" name="takeaway" placeholder="Your thoughts…"></textarea>
+          </div>
+        </div>
+
+        <div class="toolbar" style="margin-top: 24px;">
+          <button type="reset" class="btn">Reset</button>
+          <button id="submitBtn" type="submit" class="btn btn-primary">Submit Feedback</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function show(msg, ok = true) {
+      const okEl = $('alertOk');
+      const errEl = $('alertError');
+      okEl.style.display = 'none';
+      errEl.style.display = 'none';
+      (ok ? okEl : errEl).textContent = msg;
+      (ok ? okEl : errEl).style.display = 'block';
+      setTimeout(() => { (ok ? okEl : errEl).style.display = 'none'; }, ok ? 3000 : 6000);
+    }
+
+    // Build 1–10 ticks and keep them in sync with the slider
+    const range = $('usefulness');
+    const ticksWrap = $('usefulnessTicks');
+
+    const buildTicks = () => {
+      ticksWrap.innerHTML = '';
+      for (let i = 1; i <= 10; i++) {
+        const s = document.createElement('span');
+        s.className = 'tick';
+        s.dataset.value = i;
+        s.textContent = i;
+        s.role = 'button';
+        s.tabIndex = 0;
+        s.setAttribute('aria-label', `Set usefulness to ${i}`);
+        s.addEventListener('click', () => {
+          range.value = i;
+          updateHighlight();
+          range.dispatchEvent(new Event('input', { bubbles: true }));
+          range.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        s.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); s.click(); }
+        });
+        ticksWrap.appendChild(s);
+      }
+    };
+
+    const updateHighlight = () => {
+      const val = parseInt(range.value, 10);
+      [...ticksWrap.children].forEach((el) => {
+        el.classList.toggle('active', parseInt(el.dataset.value, 10) === val);
+      });
+    };
+
+    buildTicks();
+    updateHighlight();
+
+    range.addEventListener('input', updateHighlight);
+    range.addEventListener('change', updateHighlight);
+
+    // Email domain validation for @gofynd.com
+    const emailInput = $('email');
+    const gofyndPattern = /^[a-zA-Z0-9._%+-]+@gofynd\.com$/;
+    const validateEmail = () => {
+      if (!emailInput.value) { emailInput.setCustomValidity(''); return; }
+      if (!gofyndPattern.test(emailInput.value)) {
+        emailInput.setCustomValidity('Please use your @gofynd.com email address.');
+      } else {
+        emailInput.setCustomValidity('');
+      }
+    };
+    emailInput.addEventListener('input', validateEmail);
+    emailInput.addEventListener('blur', validateEmail);
+
+    // Radio pill keyboard focus hint
+    document.querySelectorAll('.radio-pill input').forEach(input => {
+      input.addEventListener('focus', (e) => {
+        e.target.parentElement.style.boxShadow = '0 0 0 3px rgba(255,107,53,0.25)';
+        e.target.parentElement.style.borderColor = '#ff6b35';
+      });
+      input.addEventListener('blur', (e) => {
+        e.target.parentElement.style.boxShadow = '';
+        if (!e.target.checked) e.target.parentElement.style.borderColor = '#e2e8f0';
+      });
+    });
+
+    // Submit -> POST to API with status-aware handling
+    $('feedbackForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+
+      validateEmail();
+      if (!form.checkValidity()) {
+        show('Please complete all required fields.', false);
+        form.reportValidity();
+        return;
+      }
+
+      const data = Object.fromEntries(new FormData(form).entries());
+      const submitBtn = $('submitBtn');
+      const originalBtnText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+
+      try {
+        const res = await fetch('https://asia-south1.workflow.boltic.app/5a8fc46c-eaff-4313-9796-4cbf2f0513a7', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...data, submitted_at: new Date().toISOString() })
+        });
+
+        // Try to parse JSON if provided
+        let payload = null;
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+          payload = await res.json().catch(() => null);
+        }
+
+        if (res.status === 200 && payload?.success === "true") {
+          // Success path
+          show(payload?.message || 'Form submitted successfully!');
+          form.reset();
+          range.value = 5;
+          updateHighlight();
+        } else if (res.status === 403 && payload?.success === "false") {
+          // Already submitted path
+          show(payload?.message || 'You have already filled the form!', false);
+        } else {
+          // Unexpected status or payload
+          const msg = payload?.message || `Submission failed (${res.status} ${res.statusText || ''}).`;
+          show(msg, false);
+        }
+      } catch (err) {
+        console.error(err);
+        show('Submission failed. Please try again or contact the organizer.', false);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
+    });
+  </script>
+</body>
+</html>
